@@ -13,8 +13,12 @@ pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesserac
 
 
 class Image:
-    data = [] # results of surface coverage are saved here when save_surface() is called
-    speed = [] # results of speed of growth are saved here when speed_calculation() is called
+    data = (
+        []
+    )  # results of surface coverage are saved here when save_surface() is called
+    speed = (
+        []
+    )  # results of speed of growth are saved here when speed_calculation() is called
     roi = None
 
     def __init__(self, image: np.ndarray, name: str):
@@ -59,11 +63,11 @@ class Image:
                 ):
                     a[j] += 1
 
-        length = int(max(a))
+        length = max(a)
 
         # new size for the scale bar - better for character recognition
-        width2 = scale_bar.shape[1] * 3
-        height2 = scale_bar.shape[0] * 3
+        width2 = int(scale_bar.shape[1] * 3)
+        height2 = int(scale_bar.shape[0] * 3)
         dim = (width2, height2)
 
         # resize of scale_bar for better recognition
@@ -102,9 +106,9 @@ class Image:
         """
 
         height, width = self.image.shape
-        self.images["image"] = self.image[0:width, 0:width]
         # crop of legend
         legend = self.image[width:height, 0:width]
+        self.images["image"] = self.image[0:width, 0:width]
         height1, width1 = legend.shape
 
         left = int(3.33 / 5 * width1)
