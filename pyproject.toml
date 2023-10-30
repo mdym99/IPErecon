@@ -17,7 +17,10 @@ requires-python = ">=3.10"
 dependencies = [
   "numpy",
   "matplotlib",
-  "scikit-image"
+  "scikit-image",
+  "regex",
+  "pytesseract",
+  "opencv-python",
 ]
 
 
