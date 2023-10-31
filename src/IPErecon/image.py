@@ -35,8 +35,8 @@ class Image:
     def load_image(cls, path: str, name: str):
         if not isinstance(path, str):
             raise TypeError("Path must be a string.")
-        image = cv2.imread(path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         return cls(image, name)
 
     @staticmethod
@@ -67,8 +67,8 @@ class Image:
         length = max(a)
 
         # new size for the scale bar - better for character recognition
-        width2 = int(scale_bar.shape[1] * 3)
-        height2 = int(scale_bar.shape[0] * 3)
+        width2 = scale_bar.shape[1] * 3
+        height2 = scale_bar.shape[0] * 3
         dim = (width2, height2)
 
         # resize of scale_bar for better recognition
@@ -132,7 +132,7 @@ class Image:
     def cropp(self):
         if self.roi is None:
             new_roi = CropImage(self.image)
-            self.__class__.roi = new_roi.roi
-            self.images['image'] = self.images['image'][self.__class__.roi[2]:self.__class__.roi[3], self.__class__.roi[0]:self.__class__.roi[1]]
+            Image.roi = new_roi.roi
+            self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3], Image.roi[0]:Image.roi[1]]
         else:
-            self.images['image'] = self.images['image'][self.__class__.roi[2]:self.__class__.roi[3],self.__class__.roi[0]:self.__class__.roi[1]]
+            self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3],Image.roi[0]:Image.roi[1]]
