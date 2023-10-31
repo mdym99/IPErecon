@@ -7,6 +7,7 @@ import cv2
 import pytesseract
 import numpy as np
 import matplotlib.pyplot as plt
+from IPErecon.helpers import *
 
 pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 # https://github.com/UB-Mannheim/tesseract/wiki
@@ -126,3 +127,12 @@ class Image:
     def define_axes(self, units: str, pixel_size: float):
         self.metadata["scale_units"] = units
         self.metadata["pixel_size"] = pixel_size
+    
+
+    def cropp(self):
+        if self.roi is None:
+            new_roi = CropImage(self.image)
+            self.__class__.roi = new_roi.roi
+            self.images['image'] = self.images['image'][self.__class__.roi[2]:self.__class__.roi[3], self.__class__.roi[0]:self.__class__.roi[1]]
+        else:
+            self.images['image'] = self.images['image'][self.__class__.roi[2]:self.__class__.roi[3],self.__class__.roi[0]:self.__class__.roi[1]]
