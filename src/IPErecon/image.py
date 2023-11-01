@@ -6,6 +6,7 @@ import re
 import cv2
 import pytesseract
 import numpy as np
+import bm3d
 import matplotlib.pyplot as plt
 from IPErecon.helpers import *
 
@@ -136,3 +137,18 @@ class Image:
             self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3], Image.roi[0]:Image.roi[1]]
         else:
             self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3],Image.roi[0]:Image.roi[1]]
+
+    def _nlmean_denoising(self,**kwargs):
+        defaultkwargs = {'h':40,'templateWindowSize': 7, 'searchWindowSize': 21}
+        defaultkwargs.update(kwargs)
+        self.images['image'] = cv2.fastNlMeansDenoising(self.images['image'],**defaultkwargs)
+    
+    def _bm3d_denoising(self,**kwargs):
+        defaultkwargs = {'sigma_psd': 40, 'stage_arg' : bm3d.BM3DStages.ALL_STAGES}
+        defaultkwargs.update(kwargs)
+        self.images['image'] = bm3d.bm3d(self.image,**defaultkwargs).astype(np.uint8)
+    
+    def _median_denoising(self,**kwargs):
+        defaultkwargs = {'ksize': 5}
+        defaultkwargs.update(kwargs)
+        self.images['image'] = cv2.medianBlur(self.image,**defaultkwargs)
