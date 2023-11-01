@@ -21,6 +21,7 @@ dependencies = [
   "regex",
   "pytesseract",
   "opencv-python",
+  "bm3d"
 ]
 
 
