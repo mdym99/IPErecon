@@ -24,9 +24,11 @@ class Image:
     roi = None
 
     def __init__(self, image: np.ndarray, name: str):
+        if not isinstance(image, np.ndarray):
+            raise TypeError("Image must be a numpy array.")
         self.images = {"image": image}
-        self.metadata = {"name": name}
-        self.results = {}
+        self.metadata = {"name": name, "units": None, "pixel_size": None}
+        self.results = {"surface_coverage": None, "surface_percentage": None}
 
     @property
     def image(self):
@@ -37,7 +39,7 @@ class Image:
         if not isinstance(path, str):
             raise TypeError("Path must be a string.")
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         return cls(image, name)
 
     @staticmethod
@@ -122,33 +124,38 @@ class Image:
         scale_bar = legend[top:bottom, left:right]
         if calculate_scale:
             units, pixel_size = self._scale_calculation(scale_bar)
-            self.metadata["scale_units"] = units
+            self.metadata["units"] = units
             self.metadata["pixel_size"] = pixel_size
 
     def define_axes(self, units: str, pixel_size: float):
-        self.metadata["scale_units"] = units
+        self.metadata["units"] = units
         self.metadata["pixel_size"] = pixel_size
-    
 
     def cropp(self):
-        if self.roi is None:
+        if not self.roi:
             new_roi = CropImage(self.image)
             Image.roi = new_roi.roi
-            self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3], Image.roi[0]:Image.roi[1]]
+            self.images["image"] = self.images["image"][
+                Image.roi[2] : Image.roi[3], Image.roi[0] : Image.roi[1]
+            ]
         else:
-            self.images['image'] = self.images['image'][Image.roi[2]:Image.roi[3],Image.roi[0]:Image.roi[1]]
+            self.images["image"] = self.images["image"][
+                Image.roi[2] : Image.roi[3], Image.roi[0] : Image.roi[1]
+            ]
 
-    def _nlmean_denoising(self,**kwargs):
-        defaultkwargs = {'h':40,'templateWindowSize': 7, 'searchWindowSize': 21}
+    def _nlmean_denoising(self, **kwargs):
+        defaultkwargs = {"h": 40, "templateWindowSize": 7, "searchWindowSize": 21}
         defaultkwargs.update(kwargs)
-        self.images['image'] = cv2.fastNlMeansDenoising(self.images['image'],**defaultkwargs)
-    
-    def _bm3d_denoising(self,**kwargs):
-        defaultkwargs = {'sigma_psd': 40, 'stage_arg' : bm3d.BM3DStages.ALL_STAGES}
+        self.images["image"] = cv2.fastNlMeansDenoising(
+            self.images["image"], **defaultkwargs
+        )
+
+    def _bm3d_denoising(self, **kwargs):
+        defaultkwargs = {"sigma_psd": 40, "stage_arg": bm3d.BM3DStages.ALL_STAGES}
         defaultkwargs.update(kwargs)
-        self.images['image'] = bm3d.bm3d(self.image,**defaultkwargs).astype(np.uint8)
-    
-    def _median_denoising(self,**kwargs):
-        defaultkwargs = {'ksize': 5}
+        self.images["image"] = bm3d.bm3d(self.image, **defaultkwargs).astype(np.uint8)
+
+    def _median_denoising(self, **kwargs):
+        defaultkwargs = {"ksize": 5}
         defaultkwargs.update(kwargs)
-        self.images['image'] = cv2.medianBlur(self.image,**defaultkwargs)
+        self.images["image"] = cv2.medianBlur(self.image, **defaultkwargs)
